@@ -947,6 +947,185 @@ Precompute the exact cost to solve subproblems and use as heuristics:
 
 ---
 
+## 3.6 IDA* (Iterative Deepening A*)
+
+### Motivation
+
+**A\*** is optimal and complete, but has a critical weakness: **memory**. A\* keeps ALL generated nodes in memory (the frontier + explored set). For a state space of branching factor b at depth d, A\* uses O(b^d) space — the same exponential blowup as BFS.
+
+**IDA\*** (Iterative Deepening A\*, Korf 1985) solves this by combining:
+- The **optimal path guarantee** of A\* (via admissible heuristics)
+- The **linear space usage** of IDS (via depth-first exploration)
+
+It is the most widely used algorithm for large-scale optimal heuristic search.
+
+### Core Idea
+
+Instead of using a priority queue like A\*, IDA\* uses **depth-first search** with a **cost threshold** based on the f-value (f = g + h).
+
+At each iteration:
+1. Run DFS, but **prune any node** whose f(n) = g(n) + h(n) **exceeds the threshold**
+2. After each iteration, set the new threshold = **minimum f-value that was pruned**
+3. Repeat until the goal is found
+
+```
+Iteration 1: threshold = f(start) = h(start)
+             DFS, prune if f(n) > threshold
+             -> Some nodes pruned, record min pruned f-value
+
+Iteration 2: threshold = min pruned f from iteration 1
+             DFS again with new threshold
+             -> More of the search tree explored
+
+...
+
+Iteration k: threshold = C* (optimal solution cost)
+             DFS finds the goal!
+```
+
+### IDA* Algorithm
+
+```
+function IDA_STAR(problem, h):
+    threshold = h(problem.INITIAL_STATE)   <- start with f(start) = 0 + h(start)
+    path = [problem.INITIAL_STATE]         <- current path (stack)
+    
+    loop:
+        result = SEARCH(path, g=0, threshold, problem, h)
+        
+        if result == FOUND:
+            return path                    <- solution found!
+        if result == INFINITY:
+            return FAILURE                 <- no solution exists
+        
+        threshold = result                 <- update threshold to min exceeded f-value
+    end loop
+
+
+function SEARCH(path, g, threshold, problem, h):
+    node = path.last()
+    f = g + h(node)
+    
+    if f > threshold:
+        return f                           <- pruned! Return this f-value
+    
+    if problem.GOAL_TEST(node):
+        return FOUND
+    
+    min_exceeded = INFINITY
+    
+    for each action in problem.ACTIONS(node):
+        child = RESULT(node, action)
+        step = STEP_COST(node, action, child)
+        
+        if child NOT in path:              <- avoid cycles (simple check)
+            path.append(child)
+            result = SEARCH(path, g + step, threshold, problem, h)
+            
+            if result == FOUND:
+                return FOUND
+            if result < min_exceeded:
+                min_exceeded = result      <- track minimum f that was pruned
+            
+            path.pop()                     <- backtrack
+    
+    return min_exceeded
+```
+
+### IDA* Step-by-Step Example (8-Puzzle)
+
+Using Manhattan Distance heuristic (h2):
+
+```
+Initial state:         Goal state:
+1  2  3                1  2  3
+4  _  6     ->         4  5  6
+7  5  8                7  8  _
+
+h(start) = Manhattan distances:
+  5 is at (2,1), goal is (1,1) -> |2-1|+|1-1| = 1
+  6 is at (1,2), goal is (1,2) -> 0
+  8 is at (2,2), goal is (2,1) -> 1
+  h(start) = 2
+
+Iteration 1: threshold = 0 + 2 = 2
+  Expand start (f=2): prune children with f > 2
+  ...some branches pruned, min exceeded f = 4
+
+Iteration 2: threshold = 4
+  Deeper DFS, prune f > 4
+  ...min exceeded f = 6
+
+Iteration 3: threshold = 6
+  Even deeper DFS
+  ...GOAL FOUND! Return solution path.
+```
+
+### How IDA* Avoids Redundant States
+
+The simple cycle check `if child NOT in path` only checks the **current path** (ancestors), not all visited states globally. This uses O(d) space but may revisit states reachable via different paths (unlike A\* which has the full explored set).
+
+**Trade-off**: IDA\* may re-expand some states, but saves enormous amounts of memory.
+
+### Complexity Analysis
+
+| Metric | IDA* |
+|--------|------|
+| **Completeness** | Yes (if h is admissible and step costs > 0) |
+| **Optimality** | Yes (if h is admissible) |
+| **Time Complexity** | O(b^d) — same as A* in most cases |
+| **Space Complexity** | O(d) — linear! (only stores current path) |
+
+### Proof of Optimality of IDA*
+
+**Claim**: IDA\* with an admissible heuristic h returns the optimal solution.
+
+**Proof sketch**:
+1. IDA\* starts with threshold = h(s₀). Since h is admissible, h(s₀) ≤ C* → the optimal solution path is NOT pruned in the first iteration (all nodes on the optimal path have f ≤ C*).
+2. The threshold only increases to the minimum exceeded f-value. Since f(n) = g(n) + h(n) ≤ C* for all nodes on the optimal path (by admissibility), the optimal path nodes are never pruned until the threshold reaches C*.
+3. When threshold = C*, IDA\* will find the goal node G with f(G) = C* via DFS, and return the path.
+4. IDA\* always selects the **smallest new threshold** → the threshold sequence is strictly increasing toward C\*, guaranteeing that the first goal found has cost = C*. ∎
+
+### IDA* vs A* — Detailed Comparison
+
+| Feature | A* | IDA* |
+|---------|-----|------|
+| **Space** | O(b^d) — exponential ❌ | O(d) — linear ✅ |
+| **Time** | O(b^d) | O(b^d) (may re-expand) |
+| **Re-expansion** | None (explored set) | Yes (states on different paths) |
+| **Optimal** | Yes (admissible h) | Yes (admissible h) |
+| **Complete** | Yes | Yes |
+| **Data structure** | Priority Queue (heap) | Stack (recursion) |
+| **Overhead** | Hash table lookups | Re-computation of f-values |
+| **Best for** | Moderate state spaces (fits in memory) | Large state spaces (memory-limited) |
+
+### IDA* vs IDS
+
+| Feature | IDS | IDA* |
+|---------|-----|------|
+| **Threshold type** | Depth limit (integer) | f-value limit (real number) |
+| **Uses heuristic** | No | Yes (informed search) |
+| **Optimality** | Yes* (unit costs) | Yes (any admissible h) |
+| **Efficiency** | Blind | Directed toward goal |
+| **Nodes expanded** | More (no heuristic pruning) | Fewer (h prunes bad paths) |
+
+### When to Use IDA*
+
+- **Large state spaces** where A\* runs out of memory
+- **Optimal solution required** (not just any solution)
+- **Good admissible heuristic** available
+- Classic applications: 15-puzzle, Rubik's Cube, robot path planning
+
+### Variants and Improvements
+
+**RBFS (Recursive Best-First Search)**: Tracks the f-value of the best alternative path at each node. More memory-efficient than A\*, slightly better than IDA\* (avoids some re-expansions).
+
+**MA\* / SMA\* (Simplified Memory-Bounded A\*)**: Uses all available memory, discards least-promising nodes when full. Best of both worlds between A\* and IDA\*.
+
+**IDA\*-CR (with Cycle Restriction)**: Enhanced cycle detection without full explored set.
+
+---
+
 # 4. Neural Networks
 
 ## 4.1 Definition & Properties
