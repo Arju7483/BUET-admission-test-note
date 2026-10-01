@@ -42,22 +42,7 @@
 
 A **formal language** is a set of strings over an alphabet Σ. Noam Chomsky classified all formal languages into a hierarchy of four types, each recognized by a corresponding machine.
 
-```
-        CHOMSKY HIERARCHY
-
-  +------------------------------------------+
-  |  Type 0: Recursively Enumerable (RE)     |  <-- Turing Machine
-  |  +------------------------------------+  |
-  |  |  Type 1: Context-Sensitive (CSL)  |  |  <-- Linear Bounded Automaton
-  |  |  +------------------------------+ |  |
-  |  |  |  Type 2: Context-Free (CFL)  | |  |  <-- Pushdown Automaton
-  |  |  |  +------------------------+  | |  |
-  |  |  |  | Type 3: Regular (RL)   |  | |  |  <-- Finite Automaton
-  |  |  |  +------------------------+  | |  |
-  |  |  +------------------------------+ |  |
-  |  +------------------------------------+  |
-  +------------------------------------------+
-```
+![Chomsky Language Hierarchy](C:\Users\mahbub.arju\.gemini\antigravity-ide\brain\f4558c02-2156-4bc0-b081-f0b69bcccc03\chomsky_hierarchy_1790835434055.jpg)
 
 | Type | Language | Grammar Rule Form | Machine |
 |------|----------|-------------------|---------|
@@ -93,27 +78,9 @@ A DFA is a 5-tuple M = (Q, Sigma, delta, q0, F) where:
 - **q0 in Q**: start state
 - **F ⊆ Q**: set of accept/final states
 
-**DFA for strings ending in "ab" over {a, b}:**
+**DFA for strings ending in "ab" — and NFA for strings containing "ab":**
 
-```
-         a              b
-    +--------+      +--------+
-    |        |      |        |
-    v   b    v  a   v   b    v
---> q0 ----> q1 ---> q2 [ACCEPT]
-    ^                |
-    |   a            | a
-    +----------------+
-
-  q0: start (no progress)
-  q1: saw 'a'
-  q2: saw 'ab' (accept)
-
-  Transitions:
-  delta(q0, a) = q1,  delta(q0, b) = q0
-  delta(q1, a) = q1,  delta(q1, b) = q2
-  delta(q2, a) = q1,  delta(q2, b) = q0
-```
+![DFA and NFA State Diagrams](C:\Users\mahbub.arju\.gemini\antigravity-ide\brain\f4558c02-2156-4bc0-b081-f0b69bcccc03\dfa_nfa_diagram_1790835479530.jpg)
 
 #### Nondeterministic Finite Automaton (NFA)
 An NFA is M = (Q, Sigma, delta, q0, F) where:
@@ -121,19 +88,7 @@ An NFA is M = (Q, Sigma, delta, q0, F) where:
 - Can have multiple choices and epsilon-transitions
 - Accepts if ANY computation path leads to an accept state
 
-**NFA for strings containing "ab":**
-```
-         a             b
-  --> q0 ---> q1 ---> q2 [ACCEPT]
-       |
-       | a,b (self-loop)
-       v
-
-  delta(q0, a) = {q0, q1}
-  delta(q0, b) = {q0}
-  delta(q1, b) = {q2}
-  delta(q2, a) = {q2}, delta(q2, b) = {q2}
-```
+> **Legend:** Single circle = non-accepting state | Double circle = accept state | Arrow with label = transition on input symbol | Self-loop = stay in same state
 
 #### NFA to DFA Conversion (Subset Construction)
 Every NFA can be converted to an equivalent DFA via the **subset construction algorithm**.
@@ -205,7 +160,7 @@ Has epsilon (epsilon) transitions — moves without consuming input.
 **Example:** Prove {a^n b^n | n >= 0} is not regular.
 - Choose w = a^p b^p, |w| = 2p >= p
 - Any split: x = a^i, y = a^j (j >= 1), z = a^(p-i-j) b^p (since |xy| <= p)
-- Pump i=2: xy^2 z = a^(p+j) b^p -> more a's than b's -> not in L. Contradiction!
+- Pump i=2: xy²z = a^(p+j) b^p → more a's than b's → not in L. Contradiction!
 
 #### Regular Expressions (RE)
 **Basis:**
@@ -280,22 +235,9 @@ A CFG is G = (V, T, P, S) where:
 **Rightmost derivation:** Always expand the rightmost non-terminal
 
 #### Parse Trees
-A parse tree visually shows derivation structure:
-```
-Grammar: E -> E+E | E*E | (E) | id
+A parse tree visually shows derivation structure. When a grammar is ambiguous, the same string has multiple parse trees:
 
-Parsing: id + id * id
-
-         E
-       / | \
-      E  +  E
-      |    / | \
-      id  E  *  E
-          |     |
-          id    id
-
-This tree has TWO leftmost derivations -> AMBIGUOUS grammar!
-```
+![Parse Tree Ambiguity Diagram](C:\Users\mahbub.arju\.gemini\antigravity-ide\brain\f4558c02-2156-4bc0-b081-f0b69bcccc03\parse_tree_ambiguity_1790835591745.jpg)
 
 #### Ambiguity
 A grammar is **ambiguous** if a string has:
@@ -415,27 +357,14 @@ A PDA is a 7-tuple M = (Q, Sigma, Gamma, delta, q0, Z0, F) where:
 1. **Acceptance by final state:** Accept when input is exhausted AND in a final state
 2. **Acceptance by empty stack:** Accept when input is exhausted AND stack is empty
 
-```
-PDA for {a^n b^n | n >= 1}:
+![Pushdown Automaton Diagram](C:\Users\mahbub.arju\.gemini\antigravity-ide\brain\f4558c02-2156-4bc0-b081-f0b69bcccc03\pda_diagram_1790835635194.jpg)
 
-  States: q0 (reading a's), q1 (reading b's), q2 (accept)
-  Stack alphabet: {Z, A}  (Z = bottom marker, A = pushed for each 'a')
-
-  Transitions:
-  delta(q0, a, Z) = {(q0, AZ)}   -- push A for first 'a'
-  delta(q0, a, A) = {(q0, AA)}   -- push A for each subsequent 'a'
-  delta(q0, b, A) = {(q1, eps)}  -- switch to reading b's, pop one A
-  delta(q1, b, A) = {(q1, eps)}  -- pop A for each 'b'
-  delta(q1, e, Z) = {(q2, Z)}    -- only Z left -> accept
-
-  Trace for "aabb":
-  (q0, aabb, Z)
-  --> (q0, abb,  AZ)    [read a, push A]
-  --> (q0, bb,  AAZ)    [read a, push A]
-  --> (q1, b,    AZ)    [read b, pop A]
-  --> (q1, eps,   Z)    [read b, pop A]
-  --> (q2, eps,   Z)    [epsilon-move to accept]   ACCEPTED
-```
+**Trace for "aabb":**
+- (q0, aabb, Z) → (q0, abb, AZ) [read a, push A]
+- (q0, abb, AZ) → (q0, bb, AAZ) [read a, push A]
+- (q0, bb, AAZ) → (q1, b, AZ) [read b, pop A]
+- (q1, b, AZ) → (q1, ε, Z) [read b, pop A]
+- (q1, ε, Z) → (q2, ε, Z) [ε-move → ACCEPTED]
 
 **Deterministic PDA (DPDA):**
 - No ambiguity in transitions
@@ -471,16 +400,8 @@ TM = (Q, Sigma, Gamma, delta, q0, q_accept, q_reject) where:
 - **q_reject**: reject state
 
 **The Tape:**
-```
-  Infinite to the right (blank-padded)
 
-  [ B | B | a | a | b | b | B | B | B ]
-                ^
-              head
-
-  - Can read, write, move left or right
-  - Blank (B) represents empty cells
-```
+![Turing Machine Diagram](C:\Users\mahbub.arju\.gemini\antigravity-ide\brain\f4558c02-2156-4bc0-b081-f0b69bcccc03\turing_machine_tape_1790835602334.jpg)
 
 **Configuration:** (q, u a v) where q = current state, head is at 'a', u = left of head, v = right of head
 
@@ -532,29 +453,20 @@ Phase 6: Scan entire tape — only X, Y, Z and blanks -> ACCEPT
 - But may loop on w not in L
 
 **Classification of Important Languages:**
-```
-DECIDABLE:
-  A_DFA     = {<M,w> | DFA M accepts w}
-  A_NFA     = {<M,w> | NFA M accepts w}
-  A_REX     = {<R,w> | RE R matches w}
-  E_DFA     = {<M>   | L(M) = empty}
-  EQ_DFA    = {<M1,M2> | L(M1) = L(M2)}
-  A_CFG     = {<G,w> | CFG G derives w}       (CYK algorithm)
-  E_CFG     = {<G>   | L(G) = empty}
-  HALT_DFA  = always decidable (DFA always halts)
 
-RE BUT NOT DECIDABLE:
-  A_TM      = {<M,w> | TM M accepts w}
-  HALT_TM   = {<M,w> | TM M halts on w}
-
-NOT EVEN RE (complement not RE either):
-  E_TM      = {<M> | L(M) = empty}
-  EQ_TM     = {<M1,M2> | L(M1) = L(M2)}
-  EQ_CFG    = {<G1,G2> | L(G1) = L(G2)}
-
-NOT RE (complement is RE):
-  Complement of A_TM
-```
+| Language | Definition | Decidability |
+|----------|------------|--------------|
+| A_DFA | {\<M,w\> \| DFA M accepts w} | **DECIDABLE** |
+| A_NFA | {\<M,w\> \| NFA M accepts w} | **DECIDABLE** |
+| E_DFA | {\<M\> \| L(M) = ∅} | **DECIDABLE** |
+| EQ_DFA | {\<M1,M2\> \| L(M1)=L(M2)} | **DECIDABLE** |
+| A_CFG | {\<G,w\> \| G derives w} | **DECIDABLE** (CYK) |
+| E_CFG | {\<G\> \| L(G) = ∅} | **DECIDABLE** |
+| A_TM | {\<M,w\> \| TM M accepts w} | **RE, NOT DECIDABLE** |
+| HALT_TM | {\<M,w\> \| TM M halts on w} | **RE, NOT DECIDABLE** |
+| E_TM | {\<M\> \| L(M) = ∅} | **NOT RE** |
+| EQ_TM | {\<M1,M2\> \| L(M1)=L(M2)} | **NOT RE** |
+| complement(A_TM) | — | **NOT RE** (co-RE) |
 
 **The Halting Problem (HALT_TM) — Undecidable:**
 Proof by diagonalization (contradiction):
@@ -630,24 +542,8 @@ ALL of these are UNDECIDABLE (by Rice's Theorem):
 ### Written Explanation
 
 **Time Complexity Classes:**
-```
-  COMPLEXITY HIERARCHY (believed, not all proven)
 
-  +-----------------------------------------------+
-  |  EXPTIME                                      |
-  |  +-------------------------------------------+|
-  |  |  PSPACE                                   ||
-  |  |  +--------------------------------------+ ||
-  |  |  |  NP                   co-NP          | ||
-  |  |  |  +----------+   +----------+         | ||
-  |  |  |  |     P    |   |          |         | ||
-  |  |  |  | (P=NP?)  |   |          |         | ||
-  |  |  |  +----------+   +----------+         | ||
-  |  |  |  NP-Complete (at the intersection)   | ||
-  |  |  +--------------------------------------+ ||
-  |  +-------------------------------------------+|
-  +-----------------------------------------------+
-```
+![Complexity Classes Diagram](C:\Users\mahbub.arju\.gemini\antigravity-ide\brain\f4558c02-2156-4bc0-b081-f0b69bcccc03\complexity_classes_1790835557194.jpg)
 
 **P (Polynomial Time):**
 Problems solvable in O(n^k) time by a deterministic TM.
@@ -739,60 +635,7 @@ If P != NP (believed): NP-Complete problems have no efficient algorithms.
 
 A compiler translates source code to target code through a pipeline of phases:
 
-```
-SOURCE PROGRAM (character stream)
-         |
-         v
-  +-----------------+
-  | LEXICAL ANALYSIS|  (Scanner / Tokenizer)
-  |  produces:      |
-  |  Token stream   |
-  +-----------------+
-         |
-         v
-  +-----------------+
-  | SYNTAX ANALYSIS |  (Parser)
-  |  produces:      |
-  |  Parse Tree/AST |
-  +-----------------+
-         |
-         v
-  +-----------------+
-  |SEMANTIC ANALYSIS|  (Type checking, Scope)
-  |  produces:      |
-  |  Annotated AST  |
-  +-----------------+
-         |
-         v
-  +-------------------+
-  | INTERMEDIATE CODE |
-  |    GENERATION     |  (Three-address code)
-  +-------------------+
-         |
-         v
-  +-----------------+
-  | CODE OPTIMIZER  |  (Machine-independent optimizations)
-  +-----------------+
-         |
-         v
-  +-----------------+
-  |  CODE GENERATOR |  (Target machine code)
-  +-----------------+
-         |
-         v
-  +-----------------+
-  | CODE OPTIMIZER  |  (Machine-dependent / Peephole)
-  +-----------------+
-         |
-         v
-TARGET PROGRAM (machine code)
-
-  Supporting Modules (used across all phases):
-    +------------------+    +------------------+
-    |  Symbol Table    |    |  Error Handler   |
-    |  Manager         |    |                  |
-    +------------------+    +------------------+
-```
+![Phases of a Compiler](C:\Users\mahbub.arju\.gemini\antigravity-ide\brain\f4558c02-2156-4bc0-b081-f0b69bcccc03\compiler_phases_1790835450131.jpg)
 
 **Front-end:** Lexical + Syntax + Semantic Analysis (analysis of source; machine-independent)
 **Back-end:** IR Gen + Optimization + Code Generation (synthesis of target; machine-dependent)
@@ -899,18 +742,8 @@ Comments:     //[^\n]*  or  /\*[\s\S]*?\*/
 The **parser** checks if the token sequence conforms to the grammar and builds a parse tree.
 
 **Two main parsing strategies:**
-```
-  TOP-DOWN PARSING                   BOTTOM-UP PARSING
-  
-  Starts at root (start symbol)      Starts at leaves (tokens)
-  Builds tree downward               Builds tree upward
-  Uses leftmost derivation           Uses rightmost derivation (in reverse)
-  LL parsers: LL(1), Recursive       LR parsers: LR(0), SLR(1), LALR(1), CLR(1)
-  Descent
-  
-  Predict which production to use    Shift tokens, reduce by productions
-  Uses FIRST and FOLLOW sets         Uses Action/Goto tables
-```
+
+![Parsing Strategies Comparison](C:\Users\mahbub.arju\.gemini\antigravity-ide\brain\f4558c02-2156-4bc0-b081-f0b69bcccc03\lr_parsing_overview_1790835649587.jpg)
 
 **Problems with Top-Down Parsing:**
 
@@ -1599,31 +1432,8 @@ Identify basic blocks:
 ```
 
 **Control Flow Graph (CFG):**
-```
-int gcd(int a, int b) {
-    while (a != b) {
-        if (a > b)
-            a = a - b;
-        else
-            b = b - a;
-    }
-    return a;
-}
 
-CFG:
-  [B1: entry]
-       |
-       v
-  [B2: if a != b] --NO--> [B5: return a]
-       |YES
-       v
-  [B3: if a > b] --NO--> [B4: b = b - a]
-       |YES                    |
-       v                       |
-  [B3b: a = a - b]             |
-       |                       |
-       +------> [back to B2] <-+
-```
+![Control Flow Graph Diagram](C:\Users\mahbub.arju\.gemini\antigravity-ide\brain\f4558c02-2156-4bc0-b081-f0b69bcccc03\cfg_control_flow_1790835680845.jpg)
 
 **Key Optimizations:**
 
@@ -1839,25 +1649,9 @@ Evaluation order: always compute the subtree needing MORE registers first
 ```
 
 **Activation Records (Stack Frame):**
-```
-High address
-  +-----------------------------+
-  | ...caller's frame...        |
-  |-----------------------------|  <- old fp (frame pointer)
-  | actual parameters           |
-  | return address              |
-  | saved old frame pointer     |
-  | local variables             |
-  | temporaries                 |
-  | saved registers             |
-  +-----------------------------+  <- sp (stack pointer)
-Low address
 
-Calling sequence:
-  Caller: push params, call instruction (saves return address)
-  Callee: save old fp, set fp=sp, allocate locals (sp = sp - size)
-  Return: restore sp=fp, restore old fp, jump to return address
-```
+![Activation Record / Stack Frame Diagram](C:\Users\mahbub.arju\.gemini\antigravity-ide\brain\f4558c02-2156-4bc0-b081-f0b69bcccc03\activation_record_1790835692858.jpg)
+
 
 **Simple Code Generation (for basic blocks):**
 ```
