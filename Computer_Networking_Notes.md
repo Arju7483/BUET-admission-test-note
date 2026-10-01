@@ -2121,6 +2121,933 @@ Always: allocate largest first, check block size is power of 2, verify no overla
 
 ---
 
+## 25. BUET-Specific Questions — Solved & Explained
+
+> All questions sourced directly from BUET MSc past papers. These are the exact question patterns that repeat.
+
+---
+
+### 25.1 QoS (Quality of Service) [BUET MSC ICT 15]
+
+**Definition:** QoS refers to a set of technologies that guarantee predictable network performance for different types of traffic.
+
+**QoS Parameters:**
+```
+1. Bandwidth    - Minimum guaranteed throughput
+2. Delay        - Maximum acceptable latency (e.g., VoIP < 150ms)
+3. Jitter       - Variation in delay (video streaming needs low jitter)
+4. Packet Loss  - Maximum acceptable drop rate
+5. Reliability  - Guaranteed delivery percentage
+```
+
+**Techniques to Achieve Good QoS:**
+
+| Technique | Description | Use Case |
+|-----------|-------------|---------|
+| **Traffic Shaping** | Limit/shape traffic flow (token bucket, leaky bucket) | ISP rate limiting |
+| **Traffic Policing** | Drop/mark packets that exceed rate | Enforce SLA |
+| **Queuing (QoS Scheduling)** | Priority queues (WFQ, PQ, CBWFQ) | Prioritize VoIP |
+| **DSCP/DiffServ** | Mark packets with priority (DSCP bits in IP TOS field) | Per-hop behavior |
+| **IntServ/RSVP** | Reserve resources per-flow across network | Guaranteed bandwidth |
+| **Traffic Classification** | Classify traffic by type (voice, video, data) | Apply policies |
+| **Compression** | Reduce header/payload size | Save bandwidth |
+| **Admission Control** | Reject new flows if network can't support them | Prevent overload |
+
+**Leaky Bucket vs Token Bucket:**
+```
+Leaky Bucket:                  Token Bucket:
+Input (bursty)                 Input (bursty)
+    |                              |
+    v                          Tokens generated at rate r
++-------+                      +----------+
+| FIFO  | --constant rate-->   | Bucket   | --up to burst size b-->
+| Queue |                      | (tokens) |
++-------+                      +----------+
+Smooths traffic (fixed output)  Allows controlled bursts
+```
+
+---
+
+### 25.2 Physical Address vs Logical Address [BUET MSC ICT 15]
+
+| Feature | Physical Address (MAC) | Logical Address (IP) |
+|---------|----------------------|---------------------|
+| **Layer** | Layer 2 (Data Link) | Layer 3 (Network) |
+| **Size** | 48 bits (6 bytes) | 32 bits (IPv4) / 128 bits (IPv6) |
+| **Assignment** | Burned into NIC by manufacturer | Assigned by admin/DHCP |
+| **Scope** | Local network only | Global (Internet-wide) |
+| **Changes** | Rarely (can be spoofed) | Changes with network |
+| **Format** | AA:BB:CC:DD:EE:FF (hex) | 192.168.1.1 (decimal) |
+| **Purpose** | Node-to-node delivery on same LAN | End-to-end routing across networks |
+| **Protocol to resolve** | — (hardwired) | ARP resolves IP -> MAC |
+
+> **Key insight:** Routers strip and replace MAC addresses at each hop; IP addresses stay the same end-to-end.
+
+---
+
+### 25.3 Baseband vs Broadband Transmission [BUET MSC ICT 15]
+
+| Feature | Baseband | Broadband |
+|---------|----------|-----------|
+| **Signal** | Digital signal, uses entire bandwidth | Analog signal, divided into channels |
+| **Bandwidth** | Entire channel = 1 signal at a time | Multiple signals on multiple frequencies |
+| **Direction** | Usually bidirectional on same wire | Typically unidirectional per channel |
+| **Distance** | Short (100m typical for Ethernet) | Long distances (cable TV, DSL) |
+| **Multiplexing** | TDM (time division) | FDM (frequency division) |
+| **Example** | Ethernet (10BASE-T) | Cable TV, ADSL, WiFi |
+| **Cost** | Lower | Higher |
+| **Complexity** | Simpler | More complex |
+
+```
+Baseband (Ethernet):
+|<----- Full bandwidth for 1 signal ----->|
+[====== Digital Signal (10 Mbps) =========]
+
+Broadband (Cable):
+|<---- Full bandwidth split by frequency ----->|
+[CH1][CH2][CH3][CH4][CH5]...[CHn]
+ TV   TV  Data  TV  Voice    ...
+```
+
+---
+
+### 25.4 Switching Comparison [BUET MSC ICT 15, 16]
+
+| Feature | Circuit Switching | Packet Switching | Message Switching | Cell Switching (ATM) |
+|---------|------------------|-----------------|-------------------|---------------------|
+| **Path** | Dedicated end-to-end | No fixed path | No fixed path | Virtual circuit |
+| **Resource** | Reserved (even if idle) | Shared dynamically | Stored at nodes | Reserved per VC |
+| **Delay** | Setup delay; then zero | Variable (queueing) | High (store-forward) | Low, predictable |
+| **Overhead** | Low (after setup) | High (headers per packet) | High (per message) | Low (fixed cells) |
+| **Unit** | Continuous stream | Variable packet | Entire message | Fixed 53-byte cells |
+| **Use** | PSTN, telephone | Internet (IP) | Old telegraph, email | ATM (legacy telco) |
+| **Efficiency** | Low (idle bandwidth wasted) | High | Medium | High |
+| **QoS** | Guaranteed | Best-effort | No guarantee | Guaranteed |
+
+**ATM (Asynchronous Transfer Mode) — Cell Switching:**
+- Fixed cell size = **53 bytes** (5 byte header + 48 byte payload)
+- Fixed size allows hardware switching at very high speeds
+- Supports **VCs (Virtual Circuits)**: PVC (Permanent) and SVC (Switched)
+- Used in backbone networks; largely replaced by MPLS
+
+---
+
+### 25.5 WiMAX [BUET MSC ICT 16]
+
+**WiMAX** = Worldwide Interoperability for Microwave Access — IEEE **802.16** standard.
+
+**Salient Features:**
+
+| Feature | Details |
+|---------|---------|
+| Standard | IEEE 802.16 (802.16e for mobile) |
+| Frequency | 2–66 GHz (licensed and unlicensed) |
+| Range | Up to **50 km** (LOS), ~5–10 km (NLOS typical) |
+| Speed | Up to **70 Mbps** per channel |
+| Access | OFDMA (downlink), TDMA (uplink) |
+| Security | AES encryption, PKM (Privacy Key Management) |
+| Mobility | 802.16e supports handoff while moving |
+| QoS | Built-in QoS (unlike WiFi) |
+| Topology | PMP (Point-to-Multipoint) or Mesh |
+| Use case | Last-mile broadband, rural connectivity, 4G backhaul |
+
+**WiFi vs WiMAX:**
+```
+WiFi (802.11):        WiMAX (802.16):
+Range: ~100m          Range: ~50 km
+Speed: up to 9.6 Gbps Speed: up to 70 Mbps
+Indoor/campus         Metropolitan area
+No built-in QoS       Built-in QoS
+```
+
+---
+
+### 25.6 Mesh Topology Formula [BUET MSC CSE 21]
+
+**Q:** 5 computers in a mesh. How many cables? How many ports per device?
+
+```
+For n devices in a FULL MESH:
+
+Cables (links) = n(n-1)/2
+Ports per device = n-1
+
+For n = 5:
+Cables = 5 x 4 / 2 = 10 cables
+Ports per device = 5 - 1 = 4 ports
+
+Verification:
+A connects to B, C, D, E  -> 4 cables from A
+B connects to C, D, E     -> 3 cables from B (A-B already counted)
+C connects to D, E        -> 2 cables from C
+D connects to E           -> 1 cable from D
+Total = 4+3+2+1 = 10 cables ✓
+```
+
+**General formulas:**
+
+| Topology | Cables needed | Ports per device |
+|----------|--------------|-----------------|
+| Bus | n-1 | 1 |
+| Star | n | 1 (n for hub) |
+| Ring | n | 2 |
+| Full Mesh | n(n-1)/2 | n-1 |
+| Tree | n-1 | varies |
+
+---
+
+### 25.7 Cookies [BUET MSC]
+
+**What is a Cookie?**
+A cookie is a small piece of data (key-value pair) stored by the browser, sent by the web server, to maintain **state** across stateless HTTP connections.
+
+```
+HTTP Flow with Cookies:
+
+First Visit:
+Client ----> GET /index.html ---------> Server
+Client <---- 200 OK                <--- Server
+             Set-Cookie: id=1234
+             (server stores user info linked to id=1234)
+
+Second Visit:
+Client ----> GET /cart              --> Server
+             Cookie: id=1234
+             (server looks up id=1234 in database)
+Client <---- 200 OK (personalized)  <-- Server
+```
+
+**Three Practical Applications of Cookies:**
+
+1. **Session Management / Authentication**
+   - Login state: after you log in, a session cookie keeps you logged in across pages
+   - Shopping cart: items stored between pages without re-adding
+
+2. **Personalization**
+   - Language preferences, theme (dark/light mode), location settings
+   - "Remember me" feature stores username/preferences
+
+3. **Tracking & Analytics**
+   - Third-party cookies track users across websites
+   - Ad networks build user profiles (Google Ads, Facebook Pixel)
+   - Site analytics count unique visitors, track pages viewed
+
+**Cookie Types:**
+
+| Type | Lifespan | Purpose |
+|------|----------|---------|
+| Session Cookie | Browser session only | Login state |
+| Persistent Cookie | Fixed expiry date | Preferences, tracking |
+| Third-party Cookie | Set by another domain | Cross-site tracking |
+| Secure Cookie | HTTPS only | Security-sensitive |
+| HttpOnly Cookie | Not accessible by JS | Prevents XSS theft |
+| SameSite Cookie | Same domain only | Prevents CSRF |
+
+---
+
+### 25.8 Email Flow: Alice (Outlook) to Bob (Gmail) [BUET MSC]
+
+**Full end-to-end email journey:**
+
+```
+Alice's PC (Outlook)
+    |
+    | [1] SMTP (port 587/465) — Alice submits to her mail server
+    v
+Alice's Mail Server (e.g., smtp.alice.com)
+    |
+    | [2] SMTP (port 25) — Server-to-server delivery
+    |     (DNS MX record lookup for gmail.com)
+    v
+Google's Mail Server (smtp.gmail.com)
+    |
+    | [3] Stored in Bob's mailbox on Google's server
+    |
+    | [4] HTTP/HTTPS (port 443) — Bob uses Gmail web browser
+    v     OR IMAP (port 993) — Bob uses mail client
+Bob's Browser / Mail Client
+```
+
+**Application-layer protocols used:**
+
+| Step | Protocol | Port | Purpose |
+|------|----------|------|---------|
+| Alice -> Alice's server | SMTP (with AUTH) | 587 | Mail submission |
+| Alice's server -> Gmail | SMTP | 25 | Mail transfer (MTA-to-MTA) |
+| Bob retrieves mail | HTTP/HTTPS | 443 | Gmail web interface |
+| Bob retrieves mail | IMAP | 993 | If using Outlook/Thunderbird |
+
+**Why SMTP for sending, IMAP/POP3 for receiving?**
+- SMTP = push protocol (sender pushes to server)
+- IMAP/POP3 = pull protocol (receiver pulls from server)
+- Web-based mail (Gmail) uses HTTP instead of IMAP at the last step
+
+---
+
+### 25.9 DNS: Recursive vs Iterative with Diagram [BUET MSC]
+
+**Scenario:** `mango.buet.ac.bd` accessing `www.uvic.ca`
+
+```
+RECURSIVE DNS (client's perspective - resolver does all work):
+
+mango.buet.ac.bd                           www.uvic.ca IP = ?
+      |
+      | Query: "What is IP of www.uvic.ca?"
+      v
+Local DNS Resolver (BUET's DNS: dns.buet.ac.bd)
+      |
+      | ITERATIVE queries below:
+      |
+      |---> Root Server (.)
+      |     "I don't know, ask .ca TLD at x.x.x.x"
+      |
+      |---> .ca TLD Server
+      |     "I don't know, ask uvic.ca NS at y.y.y.y"
+      |
+      |---> uvic.ca Authoritative Server
+      |     "www.uvic.ca = 142.104.2.226"
+      |
+      | [Resolver caches result for TTL]
+      |
+      v
+mango.buet.ac.bd gets answer: 142.104.2.226
+      |
+      v
+Browser connects to 142.104.2.226 (TCP port 80/443)
+```
+
+**Recursive Query:**
+```
+Client ---------> Resolver ---------> Root
+                     <--------------
+               Resolver ---------> TLD
+                     <--------------
+               Resolver ---------> Authoritative
+                     <--------------
+Client <--------- Resolver (final answer)
+```
+
+**Iterative Query:**
+```
+Client -> Resolver -> Root   (Root: "Ask TLD")
+Client -> Resolver -> TLD    (TLD: "Ask Auth")
+Client -> Resolver -> Auth   (Auth: "Here's IP")
+Client <- Resolver           (Final answer)
+```
+
+**Four Types of DNS Queries:**
+1. **Recursive** — Resolver handles all lookups, returns final answer
+2. **Iterative** — Each server returns best referral it can
+3. **Non-recursive** — Answered from cache directly
+4. **Inverse (Reverse DNS)** — IP → name using PTR records
+
+---
+
+### 25.10 TCP Handoff / Mobile IP [BUET MSC]
+
+**TCP Handoff** refers to the challenge of maintaining TCP connections when a mobile device moves from one network to another (changes IP address).
+
+**Problem:**
+```
+TCP connection identified by 4-tuple: (src IP, src port, dst IP, dst port)
+If mobile device moves to new network -> gets new IP
+-> TCP connection breaks (old IP no longer valid)
+```
+
+**Mobile IP Solution (RFC 3344):**
+```
+Home Network              Foreign Network
++----------+             +----------+
+|Home Agent| <---------> |Foreign   | <---> Internet
+|          |             |Agent     |
++----------+             +----------+
+     ^                        |
+     |                        v
+     |                   Mobile Node
+     |                 (new care-of addr)
+     |
+     +--- Tunnel packets to mobile node's
+          care-of address (IP-in-IP tunnel)
+```
+
+**Steps:**
+1. Mobile node moves to foreign network
+2. Gets temporary **care-of address** from Foreign Agent
+3. Registers care-of address with Home Agent
+4. Home Agent tunnels all packets to care-of address
+5. TCP connection appears unbroken (to remote host)
+
+---
+
+### 25.11 H.323 vs SIP [BUET MSC]
+
+| Feature | H.323 | SIP |
+|---------|-------|-----|
+| **Developer** | ITU-T | IETF |
+| **Design** | Binary, complex | Text-based (like HTTP/SMTP) |
+| **Architecture** | Gatekeeper-based | Proxy server-based |
+| **Flexibility** | Less flexible | Highly flexible, extensible |
+| **Scalability** | Less scalable | More scalable |
+| **NAT traversal** | Difficult | Better support (STUN, TURN) |
+| **Setup time** | Slower (multiple exchanges) | Faster |
+| **Adoption** | Older (video conferencing, ISDN) | Dominant today (VoIP, WebRTC) |
+| **Message format** | Binary ASN.1 | Plain text |
+| **Port** | TCP 1720 (call signaling) | UDP/TCP 5060, TLS 5061 |
+
+**SIP Message Flow (Phone call):**
+```
+Alice (SIP phone)          SIP Proxy          Bob (SIP phone)
+     |                        |                     |
+     |--- INVITE ------------>|                     |
+     |                        |--- INVITE --------->|
+     |                        |<--- 180 Ringing ----|
+     |<-- 180 Ringing --------|                     |
+     |                        |<--- 200 OK ---------|
+     |<-- 200 OK -------------|                     |
+     |------- ACK --------------------------------->| (RTP voice starts)
+     |<================== RTP Audio ===============>|
+     |------- BYE --------------------------------->|
+     |<------ 200 OK -------------------------------|
+```
+
+---
+
+### 25.12 Subnetting Worked Examples [BUET MSC 19, 21, 24]
+
+#### Problem 1 [BUET MSC 19]: 172.16.0.0 — 512 subnets, 100 hosts each
+
+```
+Given: 172.16.0.0 (Class B, default /16)
+Need: 512 subnets, 100 hosts per subnet
+
+Step 1 — Subnets:
+512 subnets -> 2^9 = 512 -> need to borrow 9 bits
+New prefix = /16 + 9 = /25
+
+Step 2 — Verify hosts:
+Hosts per subnet = 2^(32-25) - 2 = 2^7 - 2 = 128 - 2 = 126 >= 100 ✓
+
+Step 3 — Subnet mask:
+/25 = 11111111.11111111.11111111.10000000
+    = 255.255.255.128
+
+Answer: Subnet mask = 255.255.255.128 (/25)
+```
+
+#### Problem 2 [BUET MSC CSE 21]: 192.168.2.1/23 — Which are valid host IDs?
+
+```
+IP: 192.168.2.1/23
+Mask: /23 = 255.255.254.0
+
+Network range calculation:
+  192.168.2.1 in binary:
+  192.168. [0000 001x] . xxxxxxxx
+
+  /23 mask means: first 23 bits are network
+  Network bits: 192.168. [0000 010]  <- 7 bits of 3rd octet
+  Host bits: last bit of 3rd octet + all of 4th octet
+
+  Network address: 192.168.2.0
+  Broadcast:       192.168.3.255
+  Valid host range: 192.168.2.1 to 192.168.3.254
+
+Check each option:
+  (i)  192.168.1.100 -> 3rd octet = 1, NOT in range [2-3] -> INVALID
+  (ii) 192.168.1.198 -> 3rd octet = 1, NOT in range [2-3] -> INVALID
+  (iii)192.168.2.255 -> In range 192.168.2.0-192.168.3.255 -> but .255 in 4th octet...
+       Is it broadcast? Broadcast = 192.168.3.255, NOT 192.168.2.255 -> VALID HOST
+  (iv) 192.168.3.0   -> In range, .0 in 4th octet, but NOT the network address
+       (network = 192.168.2.0) -> VALID HOST
+
+Answers: (iii) and (iv) are valid host IDs
+```
+
+#### Problem 3 [BUET MSC CSE 24]: 192.168.20.64/26
+
+```
+Network: 192.168.20.64/26
+/26 = 255.255.255.192 (block size = 64)
+
+(i) Subnet mask: 255.255.255.192
+
+(ii) Broadcast address:
+  Network starts at .64
+  Block size = 64 (2^(32-26) = 64)
+  Broadcast = 64 + 64 - 1 = 127
+  Broadcast = 192.168.20.127
+
+(iii) Usable host range:
+  First host = 192.168.20.65
+  Last host  = 192.168.20.126
+```
+
+#### Problem 4 [BUET MSC ICT 24]: 182.8.0.0 — 63 subnets
+
+```
+Given: 182.8.0.0 (Class B, default /16)
+Need: 63 subnets
+
+Step 1: 63 subnets -> need 2^n >= 63 -> 2^6 = 64 >= 63 -> borrow 6 bits
+New prefix = /16 + 6 = /22
+
+Step 2: Subnet mask:
+/22 = 255.255.252.0
+
+Step 3: Block size per subnet = 2^(32-22) = 2^10 = 1024 addresses
+
+First subnet:
+  Network:   182.8.0.0
+  Broadcast: 182.8.3.255  (0+1024-1 = 182.8.3.255)
+  Host range: 182.8.0.1 to 182.8.3.254
+
+Highest probable 3rd host IP address:
+  3rd host = 182.8.0.3
+
+For the new subnets, the subnet mask = 255.255.252.0
+Broadcast of first subnet = 182.8.3.255
+```
+
+---
+
+### 25.13 Count-to-Infinity Remedies [BUET MSC ICT 24]
+
+**Problem:** In distance vector routing, when a link fails, routers keep incrementing the metric assuming the other router has a valid route.
+
+```
+Example: A -- B -- C
+If B-C link fails:
+  B: "C is unreachable"
+  A: "I can reach C through B with cost 2"
+  B thinks: "A can reach C with cost 2, so I can via A with cost 3"
+  A updates: cost 4 via B
+  ... loops until metric = 16 (infinity for RIP)
+```
+
+**Remedies:**
+
+| Solution | How it Works | Limitation |
+|---------|-------------|------------|
+| **Maximum Metric (count limit)** | Declare infinity at 16 hops (RIP) | Still converges slowly |
+| **Split Horizon** | Don't advertise route back on interface you learned it from | Doesn't solve all loops (3-node) |
+| **Split Horizon with Route Poisoning** | Advertise failed route with metric=infinity immediately | Faster than waiting for timeout |
+| **Holddown Timer** | After route removed, ignore updates for that route for N seconds | Slow convergence |
+| **Triggered Updates** | Send updates immediately on change (don't wait for timer) | Reduces convergence time |
+| **Route Poisoning** | When route fails, set metric=infinity and advertise | Explicit failure notification |
+
+**Why Link State (OSPF) doesn't have this problem:**
+- Routers have complete topology knowledge
+- Dijkstra's algorithm finds actual shortest path
+- No counting, no loops possible
+
+---
+
+### 25.14 10Base2, 10Base5, 10Base-T [BUET MSC ICT 15]
+
+| Standard | Medium | Speed | Max Length | Topology | Connector |
+|----------|--------|-------|-----------|----------|-----------|
+| **10Base5** | Thick coax (RG-8, "thicknet") | 10 Mbps | 500 m | Bus | AUI, N-type |
+| **10Base2** | Thin coax (RG-58, "thinnet", "cheapernet") | 10 Mbps | 185 m (~200m) | Bus | BNC |
+| **10Base-T** | UTP (Cat3+) twisted pair | 10 Mbps | 100 m | Star | RJ-45 |
+| **10Base-F** | Fiber optic | 10 Mbps | 2000 m | Star | ST/SC |
+
+```
+10Base5 (Thicknet Bus):
+Transceiver --AUI cable-- NIC
+Coax: ====[tap]=====[tap]=====[tap]====
+      (vampire tap connects to coax without cutting)
+Max nodes: 100 per segment, up to 5 segments (500 rule)
+5-4-3 rule: 5 segments, 4 repeaters, 3 populated segments
+
+10Base2 (Thinnet Bus):
+NIC ===T-connector=== coax === T-connector === NIC
+Terminators at each end (50 ohm)
+Max nodes: 30 per segment, 185m max
+
+10Base-T (Star):
+     [Hub/Switch]
+    /     |      \
+  NIC    NIC     NIC
+RJ-45 connectors, UTP cable pairs 1&2 for TX, 3&6 for RX
+```
+
+---
+
+### 25.15 Dijkstra's Algorithm — Shortest Path [BUET MSC 16]
+
+**Dijkstra's Algorithm Step-by-Step:**
+
+```
+Example Network:
+        2       5
+   A ------- B ----- E
+   |       / |       |
+  1|    3/   |4      |1
+   |  /      |       |
+   C -------- D ----- F
+        6          2
+
+Find shortest path from A to all nodes.
+
+Initialize: dist[A]=0, dist[B]=∞, dist[C]=∞, ...
+Visited: {}
+
+Step 1: Visit A (dist=0)
+  Update neighbors: B=2, C=1
+  dist: A=0, B=2, C=1, D=∞, E=∞, F=∞
+
+Step 2: Visit C (min unvisited = C with dist=1)
+  Update neighbors of C: B=min(2, 1+3)=2, D=1+6=7
+  dist: A=0, B=2, C=1, D=7, E=∞, F=∞
+
+Step 3: Visit B (min unvisited = B with dist=2)
+  Update: D=min(7, 2+4)=6, E=2+5=7
+  dist: A=0, B=2, C=1, D=6, E=7, F=∞
+
+Step 4: Visit D (min unvisited = D with dist=6)
+  Update: F=6+2=8
+  dist: A=0, B=2, C=1, D=6, E=7, F=8
+
+Step 5: Visit E (dist=7)
+  Update: F=min(8, 7+1)=8 (no change)
+
+Step 6: Visit F (dist=8) -> done
+
+Shortest paths from A:
+  A->A: 0
+  A->C: 1 (direct)
+  A->B: 2 (direct)
+  A->D: 6 (A->B->D)
+  A->E: 7 (A->B->E)
+  A->F: 8 (A->B->D->F or A->B->E->F)
+```
+
+**Algorithm Template for Exam:**
+```
+1. Set dist[source] = 0, dist[all others] = infinity
+2. Add all nodes to unvisited set
+3. While unvisited not empty:
+   a. Pick node u with minimum dist (not yet visited)
+   b. Mark u as visited
+   c. For each unvisited neighbor v of u:
+      if dist[u] + weight(u,v) < dist[v]:
+         dist[v] = dist[u] + weight(u,v)
+         prev[v] = u
+4. Reconstruct path using prev[] array
+```
+
+---
+
+### 25.16 MAC Flood Attack [BTCL-AM 17]
+
+**What is MAC Flooding?**
+
+A switch maintains a **CAM (Content Addressable Memory) table** that maps MAC addresses to ports. This table has a **limited size** (e.g., 8192 entries).
+
+**Attack:**
+```
+Attacker sends thousands of frames with FAKE, random source MAC addresses:
+  Frame 1:  src=AA:01:01:01:01:01 -> Switch learns this
+  Frame 2:  src=AA:01:01:01:01:02 -> Switch learns this
+  ...
+  Frame N:  (CAM table FULL)
+
+When CAM table overflows:
+  Switch can no longer learn new MACs
+  Switch FLOODS all unknown frames to ALL ports
+  (Behaves like a hub)
+```
+
+**How Attacker Benefits:**
+1. **Packet Sniffing:** All traffic is now flooded to all ports — attacker on any port can capture traffic meant for others
+2. **MITM:** Can intercept sensitive data (passwords, emails)
+3. **Denial of Service:** Switch CPU spikes; legitimate traffic affected
+
+**Defense:**
+- **Port Security:** Limit MAC addresses per port (e.g., max 5)
+- **Port Security Violation modes:** Shutdown/Restrict/Protect
+- **802.1X Authentication:** Port-based NAC (Network Access Control)
+- **Dynamic ARP Inspection (DAI)**
+- **VLAN segmentation:** Limit blast radius
+
+```
+Switch Config (Cisco):
+interface FastEthernet0/1
+  switchport mode access
+  switchport port-security maximum 5
+  switchport port-security violation shutdown
+  switchport port-security
+```
+
+---
+
+### 25.17 Detecting a Packet Sniffer [BUET MSC CSE 21]
+
+**How to guess a machine is sniffing:**
+
+A sniffer puts the NIC in **promiscuous mode** — it accepts ALL frames, not just its own.
+
+**Detection methods:**
+
+1. **Promiscuous Mode Detection:**
+   - Send an ICMP echo request with the correct IP but a **WRONG/nonexistent MAC**
+   - Normal NIC: rejects it (MAC mismatch)
+   - Promiscuous NIC: accepts and may respond (if IP matches)
+
+2. **DNS Reverse Lookup Test:**
+   - Sniffers often perform reverse DNS lookups on captured IPs
+   - Send traffic from a fake IP — if you get a reverse DNS query for that IP, someone is sniffing
+
+3. **ARP Test:**
+   - Send ARP request with broadcast IP but unicast MAC to a machine
+   - Only a promiscuous mode machine will respond (normally only broadcast ARPs are processed)
+
+4. **Network Traffic Analysis:**
+   - A sniffing host may show **high CPU usage** from processing all traffic
+   - Can detect using network management/SNMP
+
+5. **OS-Level Check:**
+   ```
+   Linux: ip link show | grep PROMISC
+   Windows: netsh int show interface
+   ```
+
+6. **Latency Test:**
+   - Flood network and measure response time from suspect host
+   - Sniffer host processes ALL packets -> slower response
+
+---
+
+### 25.18 Connection-Oriented vs Connectionless [BUET MSC ICT 16]
+
+| Feature | Connection-Oriented | Connectionless |
+|---------|--------------------|--------------------|
+| **Setup** | 3-way handshake before data | No setup, data sent immediately |
+| **Reliability** | Guaranteed delivery | Best-effort (may be lost) |
+| **Ordering** | Packets ordered | Packets may arrive out of order |
+| **State** | Maintained at both ends | No state maintained |
+| **Overhead** | High (connection setup/teardown) | Low |
+| **Speed** | Slower | Faster |
+| **Error handling** | End-to-end recovery | Up to application |
+| **Use case** | File transfer, web, email | DNS, video streaming, VoIP |
+
+**Protocol Examples:**
+
+| Layer | Connection-Oriented | Connectionless |
+|-------|--------------------|--------------------|
+| Transport | TCP | UDP |
+| Network | X.25 (legacy) | IP |
+| Data Link | Frame Relay (PVC) | Ethernet |
+
+**Why UDP is preferred for some apps:**
+```
+Real-time apps (VoIP, video): 
+  - Delay > packet loss (old packet useless if it arrives late)
+  - TCP retransmission introduces variable delay -> unusable
+  - UDP: drop late packets, play with slight glitch
+
+DNS:
+  - Single request-response, fits in 1 UDP packet
+  - If lost, application resends
+  - No need for TCP overhead
+
+Gaming:
+  - Position updates must be frequent and fast
+  - Old position data is stale anyway
+  - TCP head-of-line blocking kills games
+```
+
+---
+
+### 25.19 Protocols Using TCP vs UDP [BUET MSC ICT 16]
+
+**Protocols using TCP (need reliability):**
+```
+HTTP (80), HTTPS (443)    - Web browsing
+FTP (20/21)               - File transfer
+SMTP (25), IMAPS (993)    - Email
+SSH (22), Telnet (23)     - Remote access
+BGP (179)                 - Internet routing
+LDAP (389)                - Directory services
+MySQL (3306)              - Database
+RDP (3389)                - Remote desktop
+```
+
+**Protocols using UDP (need speed):**
+```
+DNS (53)        - Name resolution (fast single queries)
+DHCP (67/68)    - IP configuration (broadcast-based)
+TFTP (69)       - Simple file transfer
+SNMP (161/162)  - Network management
+NTP (123)       - Time synchronization
+RIP (520)       - Routing updates
+VoIP/SIP (5060) - Voice calls
+Video streaming  - Live video, RTSP
+QUIC/HTTP3       - Modern web (UDP-based)
+```
+
+**DNS uses BOTH:**
+- **UDP 53:** Regular queries (< 512 bytes)
+- **TCP 53:** Large responses (DNSSEC, zone transfers > 512 bytes)
+
+---
+
+### 25.20 DHCP — When Is It Needed? [BUET MSC]
+
+**DHCP is needed when:**
+1. Large network with many devices (manual assignment impractical)
+2. Devices join/leave frequently (laptops, phones, guests)
+3. IP pool management needed (reuse IPs when devices leave)
+4. Consistent network configuration required (same DNS, gateway for all)
+5. Moving devices between subnets (auto-reconfiguration)
+
+**DHCP is NOT needed (static IP better) for:**
+- Servers (need fixed IP — DNS, web, mail)
+- Printers (other devices need to find them)
+- Network devices (routers, switches)
+- Network monitoring equipment
+
+**DHCP Relay Agent:**
+```
+Branch Office            Router           DHCP Server
+(no DHCP server)      (relay agent)      (at HQ)
+     |                     |                  |
+Client DISCOVER -->  RELAY forwards  -->  Server
+(broadcast)       (unicast to server)
+Client <-- OFFER <-- RELAY forwards <-- Server
+```
+Allows one DHCP server to serve multiple subnets.
+
+---
+
+### 25.21 STP — Why and VLAN When? [BUET MSC]
+
+**Why STP is needed:**
+
+```
+Scenario without STP:
+Switch A ---- Switch B
+    |              |
+    +---- Switch C-+
+
+Frame from PC1 (broadcast):
+1. Switch A floods to B and C
+2. B floods to A and C -> A gets its own broadcast back!
+3. C floods to A and B -> A gets it again!
+4. Infinite loop -> network paralyzed (BROADCAST STORM)
+```
+
+**STP Solution Example:**
+```
+After STP converges on above topology:
+Switch A = Root Bridge (lowest BID wins)
+A-B link: Forwarding (Root -> B, Designated)
+A-C link: Forwarding (Root -> C, Designated)
+B-C link: ONE PORT BLOCKED (say C's port toward B is blocked)
+
+Now no loop: A->B, A->C, but B-C redundant link blocked
+If A-B fails: RSTP unblocks B-C port within seconds
+```
+
+**When VLAN is preferred:**
+
+1. **Security isolation:** HR, Finance, Engineering shouldn't share Layer 2
+2. **Broadcast containment:** Large flat network generates too many broadcasts
+3. **Departmental grouping without rewiring:** Logical not physical separation
+4. **Multi-tenant environments:** ISPs, data centers
+5. **VoIP separation:** Voice traffic on dedicated VLAN for QoS
+
+```
+VLAN Example:
+VLAN 10 (Data)   - PCs, workstations
+VLAN 20 (Voice)  - IP phones (QoS priority)
+VLAN 30 (Mgmt)   - Network devices management
+VLAN 99 (Native) - Trunk native VLAN
+
+Benefit: IP phones auto-discover voice VLAN via CDP/LLDP
+         Voice traffic gets higher queue priority
+         Data VLAN breach doesn't affect voice
+```
+
+---
+
+### 25.22 IP Address Assignment to Devices [BUET MSC 17]
+
+**Approach for assigning IPs in a network diagram:**
+
+**Rules:**
+1. Each router interface on a subnet needs its own IP
+2. Point-to-point links typically use /30 (2 usable hosts)
+3. LAN segments use appropriate subnet size
+4. Router interfaces on same subnet must be in same network range
+
+```
+Example Network:
+PC_A ---- [R1] ---- [R2] ---- PC_B
+          |
+        [R3]
+          |
+        PC_C
+
+Step 1: Assign WAN links (point-to-point /30):
+  R1-R2 link: 10.0.0.0/30  -> R1=10.0.0.1, R2=10.0.0.2
+  R1-R3 link: 10.0.0.4/30  -> R1=10.0.0.5, R3=10.0.0.6
+
+Step 2: Assign LAN subnets:
+  PC_A's LAN (R1): 192.168.1.0/24 -> R1=192.168.1.1, PC_A=192.168.1.2
+  PC_B's LAN (R2): 192.168.2.0/24 -> R2=192.168.2.1, PC_B=192.168.2.2
+  PC_C's LAN (R3): 192.168.3.0/24 -> R3=192.168.3.1, PC_C=192.168.3.2
+
+Step 3: Default gateway for PCs:
+  PC_A: gateway = 192.168.1.1 (R1's LAN interface)
+  PC_B: gateway = 192.168.2.1 (R2's LAN interface)
+  PC_C: gateway = 192.168.3.1 (R3's LAN interface)
+```
+
+---
+
+## 26. BUET Networking — Questions Coverage Summary
+
+| # | Question | Section in Notes |
+|---|---------|-----------------|
+| 1 | QoS definition and techniques | §25.1 |
+| 2 | Physical vs Logical address | §25.2 |
+| 3 | Baseband vs Broadband | §25.3 |
+| 4 | Message/Packet/Circuit/Cell switching | §25.4 + §1 |
+| 5 | Compare circuit/packet/cell switching | §25.4 |
+| 6 | WiMAX features | §25.5 |
+| 7 | Mesh topology (5 devices): cables/ports | §25.6 |
+| 8 | DNS — what it is, how it works | §11 + §25.9 |
+| 9 | Cookies and 3 applications | §25.7 |
+| 10 | Alice(Outlook)->Bob(Gmail) email flow | §25.8 |
+| 11 | DNS recursive/iterative with diagram | §25.9 |
+| 12 | Why some apps prefer UDP | §25.18 |
+| 13 | VPN short note | §22 |
+| 14 | Why STP? When use VLAN? | §25.21 + §13 |
+| 15 | 4 types of DNS queries + diagram | §25.9 |
+| 16 | DHCP operation + when needed | §21 + §25.20 |
+| 17 | TCP handoff, cookies, H.323 vs SIP, DNS spoofing | §25.10, §25.7, §25.11, §16 |
+| 18 | 3 private IP ranges and use | §6 |
+| 19 | 172.16.0.0: 512 subnets, 100 hosts | §25.12 |
+| 20 | 192.168.2.1/23 valid host IDs | §25.12 |
+| 21 | 192.168.20.64/26: mask/broadcast/hosts | §25.12 |
+| 22 | 182.8.0.0: 63 subnets, mask, broadcast | §25.12 |
+| 23 | Count-to-infinity remedy | §25.13 |
+| 24 | Why CSMA/CD not in wireless | §5 |
+| 25 | Why DV routing not in larger networks | §8 |
+| 26 | 10Base2, 10Base5, 10Base-T | §25.14 |
+| 27 | Dijkstra shortest path from router A | §25.15 |
+| 28 | MAC flood attack | §25.16 |
+| 29 | Assign IPs to each device | §25.22 |
+| 30 | Detecting packet sniffing on LAN | §25.17 |
+| 31 | TCP/IP vs OSI model | §3 |
+| 32 | Connectionless vs connection-oriented | §25.18 |
+| 33 | TCP vs UDP + protocols using each | §9 + §25.19 |
+
+---
+
 *Compiled for BUET MSc | University Admission | BCS Preli+Written | Bank IT Officer*
 *Covers: Gate CS, BUET, DU, KUET admission exams*
+*All 33 BUET Networking questions are now covered.*
 *Last Updated: October 2026*
